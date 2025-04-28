@@ -4,7 +4,7 @@ import 'package:cgpa/data/model/student_model.dart';
 class CgpaModel {
   Student? student;
   List<Semesters>? semesters;
-  int? totalCredits;
+  double? totalCredits;
   double? finalCGPA;
   bool? defenseIncluded;
 

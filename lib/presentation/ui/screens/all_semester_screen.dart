@@ -1,6 +1,8 @@
+import 'package:cgpa/presentation/state_holders/average_cgpa_controller.dart';
 import 'package:cgpa/presentation/ui/screens/all_semester_result_screen.dart';
 import 'package:cgpa/presentation/ui/utils/app_constant.dart';
 import 'package:cgpa/presentation/ui/utils/assets_path.dart';
+import 'package:cgpa/presentation/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:cgpa/presentation/ui/widgets/custom_theme_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -19,6 +21,7 @@ class _AllSemesterScreenState extends State<AllSemesterScreen> {
   bool isDarkMode = false;
   final TextEditingController _idTEController=TextEditingController();
   final GlobalKey<FormState> _formKey=GlobalKey<FormState>();
+  final AverageCgpaController averageCgpaController = Get.find<AverageCgpaController>();
 
   @override
   Widget build(BuildContext context) {
@@ -70,16 +73,25 @@ class _AllSemesterScreenState extends State<AllSemesterScreen> {
                     },
                     ),
                     SizedBox(height: 40),
-                    ElevatedButton(onPressed: () {
-                      _onTapNextButton();
-                    },
-                      style: ElevatedButton.styleFrom(fixedSize: Size(150, 50)),
-                      child: Icon(
-                        Icons.navigate_next,
-                        color: Colors.black,
-                        size: 32,
-                      ),
-                    ),
+                    GetBuilder<AverageCgpaController>(
+                        builder: (semesterResultController) {
+                          return Visibility(
+                            visible: !semesterResultController.inProgress,
+                            replacement: CenteredCircularProgressIndicator(),
+                            child: ElevatedButton(
+                              onPressed: _onTapNextButton,
+                              style: ElevatedButton.styleFrom(
+                                fixedSize: Size(150, 50),
+                              ),
+                              child: Icon(
+                                Icons.navigate_next,
+                                color: Colors.black,
+                                size: 32,
+                              ),
+                            ),
+                          );
+                        }
+                    )
                   ],
                 ),
               ),
@@ -97,18 +109,19 @@ class _AllSemesterScreenState extends State<AllSemesterScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    bool result=true;
-    // bool result = await _emailVerificationController.verifyEmail(
-    //     _emailTEController.text.trim());
-    if (result) {
-      Get.to(() => AllSemesterResultScreen());
+    String studentId = _idTEController.text.trim();
+
+    bool isSuccess = await averageCgpaController.getCgpa(studentId);
+
+    if (isSuccess) {
+      Get.to(() => AllSemesterResultScreen(), arguments: {
+        'cgpaData': averageCgpaController.cgpaData,  // Pass the model here
+      });
+    } else {
+      Get.snackbar('Error', averageCgpaController.errorMassage ?? 'Something went wrong');
     }
-    // } else {
-    //   if (mounted) {
-    //     showSnackBarMassage(_emailVerificationController.errorMassage!, true);
-    //   }
-    // }
   }
+
   @override
   void dispose() {
     _idTEController.dispose();

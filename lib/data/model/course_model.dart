@@ -2,7 +2,7 @@ class Courses {
   String? title;
   String? code;
   String? grade;
-  int? credits;
+  double? credits;
   double? cgpa;
 
   Courses({this.title, this.code, this.grade, this.credits, this.cgpa});
