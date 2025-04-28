@@ -18,7 +18,7 @@ class SemesterResultController extends GetxController {
   Future<bool> getSemesterResult(String semesterId, String studentId) async {
     bool isSuccess = false;
     _inProgress = true;
-    update(); // This will trigger the GetBuilder to rebuild
+    update();
     final NetworkResponse response = await Get.find<NetworkCaller>().getRequest(
       url: Urls.oneSemester(semesterId, studentId),
     );
@@ -31,7 +31,7 @@ class SemesterResultController extends GetxController {
       _errorMassage = response.errorMassage;
     }
     _inProgress = false;
-    update(); // This will trigger the GetBuilder to rebuild again
+    update();
     return isSuccess;
   }
 }

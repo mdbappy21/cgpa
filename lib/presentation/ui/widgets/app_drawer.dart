@@ -66,9 +66,9 @@ class AppDrawer extends StatelessWidget {
           Column(
             children: [
               SizedBox(height: 8),
-              Text("Developer : Md Bappy"),
-              Text("Batch: 61"),
-              Text("Version 1.0.0"),
+              Text("Developer : Md Bappy",style: TextStyle(color: Colors.grey),),
+              Text("Batch: 61",style: TextStyle(color: Colors.grey),),
+              Text("Version 1.0.0",style: TextStyle(color: Colors.grey),),
               SizedBox(height: 8)
             ],
           ),

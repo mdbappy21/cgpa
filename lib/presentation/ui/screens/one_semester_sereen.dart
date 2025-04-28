@@ -1,4 +1,5 @@
 import 'package:cgpa/presentation/state_holders/semester_result_controller.dart';
+import 'package:cgpa/presentation/state_holders/student_details_info_controller.dart';
 import 'package:cgpa/presentation/ui/screens/one_semester_result_screen.dart';
 import 'package:cgpa/presentation/ui/utils/app_constant.dart';
 import 'package:cgpa/presentation/ui/utils/assets_path.dart';
@@ -24,6 +25,7 @@ class _OneSemesterScreenState extends State<OneSemesterScreen> {
  final TextEditingController _idTEController=TextEditingController();
   final GlobalKey<FormState> _formKey=GlobalKey<FormState>();
   final SemesterResultController semesterResultController = Get.find<SemesterResultController>();
+  final StudentDetailsInfoController studentDetailsInfoController = Get.find<StudentDetailsInfoController>();
   final Map<String, String> _semesterOptions = {
     'Spring 2025': '251',
     'Fall 2024': '243',
@@ -118,7 +120,7 @@ class _OneSemesterScreenState extends State<OneSemesterScreen> {
                         hintText: "Enter your Student ID",
                         labelText: "Enter your Student ID",
                       ),
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: isDarkMode?Colors.white:Colors.black),
                       validator: (String? value) {
                         if (value?.trim().isEmpty ?? true) {
                           return 'Enter your Student Id ex:221-15-XXXX';
@@ -175,8 +177,13 @@ class _OneSemesterScreenState extends State<OneSemesterScreen> {
     }
     bool isSuccess = await semesterResultController.getSemesterResult(
         semesterCode, studentId);
-    if (isSuccess) {
-      Get.to(() => OneSemesterResultScreen(semesterDetailsList: semesterResultController.sgpa));
+    bool isSuccessStudentDetails = await studentDetailsInfoController
+        .getStudentInfo(studentId);
+    if (isSuccess && isSuccessStudentDetails ) {
+      Get.to(() =>
+          OneSemesterResultScreen(
+            semesterDetailsList: semesterResultController.sgpa,
+            studentInfoDetails: studentDetailsInfoController.studentInfo,));
     } else {
       Get.snackbar('Error',
           semesterResultController.errorMassage ?? 'Something went wrong');

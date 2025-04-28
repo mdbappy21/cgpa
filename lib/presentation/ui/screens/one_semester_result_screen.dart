@@ -1,10 +1,14 @@
 import 'package:cgpa/data/model/semester_details_model.dart';
+import 'package:cgpa/data/model/student_details_info_model.dart';
+import 'package:cgpa/presentation/ui/utils/app_color.dart';
+import 'package:cgpa/presentation/ui/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
 
 class OneSemesterResultScreen extends StatefulWidget {
   final List<SemesterDetailsModel> semesterDetailsList;
+  final StudentDetailsInfoModel studentInfoDetails;
 
-  const OneSemesterResultScreen({super.key, required this.semesterDetailsList});
+  const OneSemesterResultScreen({super.key, required this.semesterDetailsList, required this.studentInfoDetails});
 
   @override
   State<OneSemesterResultScreen> createState() =>
@@ -18,7 +22,6 @@ class _OneSemesterResultScreenState extends State<OneSemesterResultScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("DIU CGPA"),
-        leading: Icon(Icons.menu),
         actions: [Icon(Icons.picture_as_pdf), SizedBox(width: 16)],
       ),
       body: SingleChildScrollView(
@@ -44,12 +47,13 @@ class _OneSemesterResultScreenState extends State<OneSemesterResultScreen> {
           ),
         ),
       ),
+      drawer: AppDrawer(),
     );
   }
 
   Widget _buildCourseResultCard(SemesterDetailsModel semester) {
     return Card(
-      color: Colors.grey.shade300,
+      color: ColorPicker(semester),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -72,6 +76,33 @@ class _OneSemesterResultScreenState extends State<OneSemesterResultScreen> {
         Text('Grade Point: ${semester.pointEquivalent}', style: Theme.of(context).textTheme.titleMedium,),
       ],
     );
+  }
+
+  Color ColorPicker(SemesterDetailsModel semester){
+    if(semester.pointEquivalent==4){
+      return Colors.green;
+    }else if(semester.pointEquivalent==3.75){
+      return Colors.purple;
+    }else if(semester.pointEquivalent==3.5){
+      return Colors.amber;
+    }else if(semester.pointEquivalent==3.25){
+      return Colors.blue;
+    }else if(semester.pointEquivalent==3){
+      return Colors.cyan;
+    }else if(semester.pointEquivalent==2.75){
+      return Colors.teal;
+    }else if(semester.pointEquivalent==2.5){
+      return Colors.brown;
+    }else if(semester.pointEquivalent==2.25){
+      return Colors.blueGrey;
+    }else if(semester.pointEquivalent==2){
+      return Colors.grey.shade300;
+    }
+    else{
+      // return Colors.grey.shade300;
+      return Colors.red;
+    }
+
   }
 
   Widget _buildCreditContainer(SemesterDetailsModel semester) {
@@ -99,14 +130,12 @@ class _OneSemesterResultScreenState extends State<OneSemesterResultScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Semester Information",
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              Text("Semester Information", style: Theme.of(context).textTheme.titleLarge?.copyWith(color:AppColors.themeColor2),),
               SizedBox(height: 8),
-              Text("Student Id : ${semester.studentId}",style: Theme.of(context).textTheme.titleMedium),
-              Text("Credit :$totalCredit ",style: Theme.of(context).textTheme.titleMedium),
-              Text("Semester : ${semester.semesterName}-${semester.semesterYear}",style: Theme.of(context).textTheme.titleMedium),
-              Text("Year : ${semester.semesterYear}",style: Theme.of(context).textTheme.titleMedium),
+              Text("Student Id : ${semester.studentId}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+              Text("Credit :$totalCredit ",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+              Text("Semester : ${semester.semesterName}-${semester.semesterYear}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+              Text("Year : ${semester.semesterYear}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
             ],
           ),
         ),
@@ -115,6 +144,7 @@ class _OneSemesterResultScreenState extends State<OneSemesterResultScreen> {
   }
 
   Widget _buildPersonalInformationSection(BuildContext context) {
+    StudentDetailsInfoModel student = widget.studentInfoDetails;
     return SizedBox(
       width: double.maxFinite,
       child: Card(
@@ -125,18 +155,15 @@ class _OneSemesterResultScreenState extends State<OneSemesterResultScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Personal Information",
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              Text("Personal Information", style: Theme.of(context).textTheme.titleLarge?.copyWith(color:AppColors.themeColor2),),
               SizedBox(height: 8),
-              Text("Name : ",style: Theme.of(context).textTheme.titleMedium),
-              Text("Program : ",style: Theme.of(context).textTheme.titleMedium),
-              Text("Campus : ",style: Theme.of(context).textTheme.titleMedium),
-              Text("Shift : ",style: Theme.of(context).textTheme.titleMedium),
-              Text("Department : ",style: Theme.of(context).textTheme.titleMedium),
-              Text("Batch : ",style: Theme.of(context).textTheme.titleMedium),
-              Text("Faculty : ",style: Theme.of(context).textTheme.titleMedium),
+              Text("Name : ${student.studentName}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+              Text("Program ${student.programName}: ",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+              Text("Campus :${student.campusName} ",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+              Text("Shift : ${student.shift}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+              Text("Department : ${student.departmentName}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+              Text("Batch : ${student.batchNo}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+              Text("Faculty : ${student.facultyName}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
             ],
           ),
         ),

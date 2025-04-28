@@ -44,8 +44,8 @@ class StudentDetailsInfoModel {
     campusName = json['campusName'];
     studentName = json['studentName'];
     batchId = json['batchId'];
-    batchNo = json['batchNo'];
-    programCredit = json['programCredit'];
+    batchNo = _safeIntConversion(json['batchNo']);
+    programCredit = _safeIntConversion(json['programCredit']);
     programId = json['programId'];
     programName = json['programName'];
     progShortName = json['progShortName'];
@@ -57,5 +57,11 @@ class StudentDetailsInfoModel {
     semesterId = json['semesterId'];
     semesterName = json['semesterName'];
     shift = json['shift'];
+  }
+  int? _safeIntConversion(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value.toInt();
+    if (value is int) return value;
+    return null;
   }
 }
