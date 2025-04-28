@@ -19,6 +19,8 @@ dependencies:
   shared_preferences: ^2.5.3
   dropdown_button2: ^2.3.9
   logger: ^2.5.0
+  percent_indicator: ^4.2.5
+  fl_chart: ^0.71.0
 
 dev_dependencies:
   flutter_test:
@@ -31,7 +33,6 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/icons/
 
   # fonts:
   #   - family: Schyler

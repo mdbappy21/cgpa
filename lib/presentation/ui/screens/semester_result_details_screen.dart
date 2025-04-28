@@ -1,4 +1,7 @@
+import 'package:cgpa/data/model/course_model.dart';
+import 'package:cgpa/data/model/semester.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class SemesterResultDetailsScreen extends StatefulWidget {
   const SemesterResultDetailsScreen({super.key});
@@ -9,6 +12,12 @@ class SemesterResultDetailsScreen extends StatefulWidget {
 }
 
 class _SemesterResultDetailsScreenState extends State<SemesterResultDetailsScreen> {
+  late Semesters semester;
+  @override
+  void initState() {
+    super.initState();
+    semester = Get.arguments as Semesters; // ✅ cast properly
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,9 +38,10 @@ class _SemesterResultDetailsScreenState extends State<SemesterResultDetailsScree
               ListView.builder(
                 shrinkWrap: true,
                 primary: false,
-                itemCount: 12,
+                itemCount: semester.courses?.length ?? 0,
                 itemBuilder: (context, index) {
-                  return _buildCourseResultCard(context);
+                  final course = semester.courses![index];
+                  return _buildCourseResultCard(context,course);
                 },
               ),
             ],
@@ -41,7 +51,7 @@ class _SemesterResultDetailsScreenState extends State<SemesterResultDetailsScree
     );
   }
 
-  Widget _buildCourseResultCard(BuildContext context) {
+  Widget _buildCourseResultCard(BuildContext context, Courses course) {
     return Card(
       color: Colors.grey.shade300,
       child: Padding(
@@ -49,27 +59,27 @@ class _SemesterResultDetailsScreenState extends State<SemesterResultDetailsScree
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildCourseResultInfo(context),
-            _buildCreditContainer(),
+            Expanded(child: _buildCourseResultInfo(context,course)),
+            _buildCreditContainer(course.credits),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCourseResultInfo(BuildContext context) {
+  Widget _buildCourseResultInfo(BuildContext context,Courses course) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('CSE311', style: Theme.of(context).textTheme.titleMedium),
-        Text('Database Management System', style: Theme.of(context).textTheme.titleMedium,),
-        Text('Grade : ', style: Theme.of(context).textTheme.titleMedium,),
-        Text('Grade Point: ', style: Theme.of(context).textTheme.titleMedium,),
+        Text('${course.code}', style: Theme.of(context).textTheme.titleMedium),
+        Text('${course.title}', style: Theme.of(context).textTheme.titleMedium?.copyWith(overflow: TextOverflow.ellipsis),),
+        Text('Grade : ${course.grade}', style: Theme.of(context).textTheme.titleMedium,),
+        Text('Grade Point: ${course.cgpa}', style: Theme.of(context).textTheme.titleMedium,),
       ],
     );
   }
 
-  Widget _buildCreditContainer() {
+  Widget _buildCreditContainer(double? credit) {
     return Container(
       width: 32,
       height: 32,
@@ -77,7 +87,7 @@ class _SemesterResultDetailsScreenState extends State<SemesterResultDetailsScree
         borderRadius: BorderRadius.circular(16),
         color: Colors.orange,
       ),
-      child: Center(child: Text("3", textAlign: TextAlign.center)),
+      child: Center(child: Text("$credit", textAlign: TextAlign.center)),
     );
   }
 
@@ -96,11 +106,9 @@ class _SemesterResultDetailsScreenState extends State<SemesterResultDetailsScree
                 "Semester Information",
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-              Text("Student Id : "),
-              Text("Credit : "),
-              Text("Semester : "),
-              Text("Year : "),
-              Text("Batch : "),
+              Text("Credit : ${semester.semesterCredits}"),
+              Text("SGPA : ${semester.semesterCGPA}"),
+              Text("Semester : ${semester.semester}"),
             ],
           ),
         ),

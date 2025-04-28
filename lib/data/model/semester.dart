@@ -3,12 +3,15 @@ import 'package:cgpa/data/model/course_model.dart';
 class Semesters {
   String? semester;
   List<Courses>? courses;
-  // final double? cgpa;
+  double? semesterCGPA;
+  double? semesterCredits;
 
-  Semesters({this.semester, this.courses});
+  Semesters({this.semester, this.semesterCGPA,this.semesterCredits, this.courses});
 
   Semesters.fromJson(Map<String, dynamic> json) {
     semester = json['semester'];
+    semesterCGPA = json['semesterCGPA'];
+    semesterCredits = json['semesterCredits'];
     if (json['courses'] != null) {
       courses = <Courses>[];
       json['courses'].forEach((v) {
@@ -16,15 +19,4 @@ class Semesters {
       });
     }
   }
-
-  @override
-  String toString() {
-    return '$semester';
-  }
-
-  // factory Semesters.fromJson(Map<String, dynamic> json) {
-  //   return Semesters(
-  //     semester: json['semesterName'] ?? 'Unknown',
-  //   );
-  // }
 }

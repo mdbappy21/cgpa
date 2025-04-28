@@ -1,6 +1,9 @@
 import 'package:cgpa/data/model/cgpa_model.dart';
+import 'package:cgpa/data/model/semester.dart';
 import 'package:cgpa/presentation/ui/screens/semester_result_details_screen.dart';
 import 'package:cgpa/presentation/ui/widgets/app_drawer.dart';
+import 'package:cgpa/presentation/ui/widgets/cgpa_indicator.dart';
+import 'package:cgpa/presentation/ui/widgets/dynamic_cgpa_curve_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -15,6 +18,15 @@ class AllSemesterResultScreen extends StatefulWidget {
 }
 
 class _AllSemesterResultScreenState extends State<AllSemesterResultScreen> {
+  List<Map<String, dynamic>> _getSemesterResults() {
+    return widget.cgpaData.semesters?.map((semester) {
+      return {
+        "semester": semester.semester, // Make sure Semesters model has `name`
+        "cgpa": semester.semesterCGPA, // Handle if cgpa might be null
+      };
+    }).toList() ?? [];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,13 +41,15 @@ class _AllSemesterResultScreenState extends State<AllSemesterResultScreen> {
             children: [
               _buildPersonalInformationSection(),
               _buildSemesterInformationSection(),
-              SizedBox(height: 8),
-              Container(
+              SizedBox(height: 32),
+              SizedBox(
                 height: 250,
-                width: double.maxFinite,
-                color: Colors.grey,
-                child: Text("Curve will here", textAlign: TextAlign.center),
+                width: double.infinity,
+                child: DynamicCGPACurveChart(
+                  semesterResults: _getSemesterResults(),
+                ),
               ),
+
               SizedBox(height: 8),
               GridView.builder(
                 shrinkWrap: true,
@@ -48,10 +62,8 @@ class _AllSemesterResultScreenState extends State<AllSemesterResultScreen> {
                 ),
                 itemCount: widget.cgpaData.semesters?.length ?? 0,
                 itemBuilder: (context, index) {
-                  var semester = widget.cgpaData.semesters![index];
-                  // print('${widget.cgpaData.semesters}');
-                  print('${semester}');
-                  return _buildSemesterOverviewResult(context,semester);
+                  Semesters semester = widget.cgpaData.semesters![index];
+                  return _buildSemesterOverviewResult(context, semester);
                 },
               ),
               SizedBox(height: 8)
@@ -64,10 +76,13 @@ class _AllSemesterResultScreenState extends State<AllSemesterResultScreen> {
     );
   }
 
-  Widget _buildSemesterOverviewResult(BuildContext context,var semester) {
+  Widget _buildSemesterOverviewResult(BuildContext context, Semesters semester) {
     return GestureDetector(
       onTap: (){
-        Get.to(()=>SemesterResultDetailsScreen());
+        Get.to(
+          const SemesterResultDetailsScreen(),
+          arguments: semester,
+        );
       },
       child: Card(
         elevation: 2,
@@ -81,11 +96,11 @@ class _AllSemesterResultScreenState extends State<AllSemesterResultScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("3.5", textAlign: TextAlign.center,
+            Text("${semester.semesterCGPA}", textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleLarge
             ),
             SizedBox(height: 8),
-            Text("$semester",
+            Text("${semester.semester}",
                 style: Theme.of(context).textTheme.titleSmall
             ),
           ],
@@ -106,32 +121,27 @@ class _AllSemesterResultScreenState extends State<AllSemesterResultScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Semester Information", style: Theme.of(context).textTheme.titleLarge,),
-                  Text("Student Id : ${widget.cgpaData.student!.id}",
-                    style: Theme.of(context).textTheme.titleMedium,),
-                  Text("Credit : ${widget.cgpaData.totalCredits}",
-                    style: Theme.of(context).textTheme.titleMedium,),
-                  Text("Semester : ${widget.cgpaData.semesters?.length}",
-                    style: Theme.of(context).textTheme.titleMedium,),
-                  Text("Year : will be update soon",
-                    style: Theme.of(context).textTheme.titleMedium,),
-                  Text("Batch : will be update soon",
-                    style: Theme.of(context).textTheme.titleMedium,),
-                ],
-              ),
-              Container(
-                height: 80,
-                width: 80,
-                decoration: BoxDecoration(
-                  color: Colors.green, // Applying color here
-                  borderRadius: BorderRadius.circular(40), // Border radius inside BoxDecoration
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Semester Information", style: Theme.of(context).textTheme.titleLarge,),
+                    Text("Student Id : ${widget.cgpaData.student!.id}",
+                      style: Theme.of(context).textTheme.titleMedium,),
+                    Text("Credit : ${widget.cgpaData.totalCredits}",
+                      style: Theme.of(context).textTheme.titleMedium,),
+                    Text("Semester : ${widget.cgpaData.semesters?.length}",
+                      style: Theme.of(context).textTheme.titleMedium,),
+                    Text("Year : ${widget.cgpaData.student!.year}",
+                      style: Theme.of(context).textTheme.titleMedium,),
+                    Text("Batch : ${widget.cgpaData.student!.batch}",
+                      style: Theme.of(context).textTheme.titleMedium,),
+                  ],
                 ),
-                child: Align(alignment:Alignment.center,child: Text("${widget.cgpaData.finalCGPA}")),
-              )
-
+              ),
+              CgpaIndicator(
+                cgpa: widget.cgpaData.finalCGPA!,
+              ),
             ],
           ),
         ),
@@ -159,15 +169,15 @@ class _AllSemesterResultScreenState extends State<AllSemesterResultScreen> {
               Text("Name : ${widget.cgpaData.student!.name}",
                 style: Theme.of(context).textTheme.titleMedium,),
               Text("Program : ${widget.cgpaData.student!.program}",
-                style: Theme.of(context).textTheme.titleMedium,),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(overflow: TextOverflow.ellipsis),),
               Text("Campus : ${widget.cgpaData.student!.campus}",
                 style: Theme.of(context).textTheme.titleMedium,),
-              Text("Shift : ${widget.cgpaData.student!}",
+              Text("Shift : ${widget.cgpaData.student!.shift}",
                 style: Theme.of(context).textTheme.titleMedium,),
               Text("Department :${widget.cgpaData.student!.department} ",
-                style: Theme.of(context).textTheme.titleMedium,),
-              Text("Faculty : ${widget.cgpaData.student}",
-                style: Theme.of(context).textTheme.titleMedium,),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(overflow: TextOverflow.ellipsis),),
+              Text("Faculty : ${widget.cgpaData.student!.faculty}",
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(overflow: TextOverflow.ellipsis),),
             ],
           ),
         ),
