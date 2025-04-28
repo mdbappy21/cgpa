@@ -22,62 +22,89 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: 48),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Align(
-              alignment: Alignment.topRight,
-              child: CustomThemeSwitch(
-                isDarkMode: isDarkMode,
-                onToggle: (bool value) {
-                  setState(() {isDarkMode = value;});
-                  if (isDarkMode) {
-                    widget.onThemeChanged(ThemeMode.dark);
-                  } else {
-                    widget.onThemeChanged(ThemeMode.light);
-                  }
-                },
+      body: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (value, _) {
+          exitAppPopUp();
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 48),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Align(
+                alignment: Alignment.topRight,
+                child: CustomThemeSwitch(
+                  isDarkMode: isDarkMode,
+                  onToggle: (bool value) {
+                    setState(() {isDarkMode = value;});
+                    if (isDarkMode) {
+                      widget.onThemeChanged(ThemeMode.dark);
+                    } else {
+                      widget.onThemeChanged(ThemeMode.light);
+                    }
+                  },
+                ),
               ),
             ),
-          ),
-          SvgPicture.asset(AssetsPath.appLogo, width: 220),
-          Padding(
-            padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 8,),
-            child: Column(
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Get.to(() => OneSemesterScreen(onThemeChanged: widget.onThemeChanged));
-                  },
-                  child: Text(
-                    "One Semester SGPA",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.themeColor1
+            SvgPicture.asset(AssetsPath.appLogo, width: 220),
+            Padding(
+              padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 8,),
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.to(() => OneSemesterScreen(onThemeChanged: widget.onThemeChanged));
+                    },
+                    style: ElevatedButton.styleFrom(elevation: 3),
+                    child: Text(
+                      "Semester SGPA",
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppColors.themeColor1
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 48),
-                ElevatedButton(
-                  onPressed: () {
-                    Get.to(() => AllSemesterScreen(onThemeChanged: widget.onThemeChanged));
-                  },
-                  child: Text(
-                    "Average CGPA",
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.themeColor2
+                  SizedBox(height: 48),
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.to(() => AllSemesterScreen(onThemeChanged: widget.onThemeChanged));
+                    },
+                    style: ElevatedButton.styleFrom(elevation: 3),
+                    child: Text(
+                      "Average CGPA",
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppColors.themeColor2
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Expanded(child: SvgPicture.asset(AssetsPath.bottomLogo, width: 220)),
-        ],
+            Expanded(child: SvgPicture.asset(AssetsPath.bottomLogo, width: 220)),
+          ],
+        ),
       ),
     );
   }
+  void exitAppPopUp() {
+    Get.defaultDialog(
+      backgroundColor:AppColors.themeColor1,
+      buttonColor: AppColors.themeColor2,
+      title: 'Exit App',
+      middleText: 'Are you sure you want to exit the app?',
+      barrierDismissible: false,
+      textCancel: 'Stay',
+      cancelTextColor: Colors.black,
+      textConfirm: 'Exit',
+      onCancel: () {
+        Get.back();
+      },
+      onConfirm: () {
+        Get.close(1);
+      },
+    );
+  }
+
 }
