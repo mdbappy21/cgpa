@@ -1,4 +1,5 @@
 import 'package:cgpa/presentation/state_holders/average_cgpa_controller.dart';
+import 'package:cgpa/presentation/state_holders/theme_controller.dart';
 import 'package:cgpa/presentation/ui/screens/all_semester_result_screen.dart';
 import 'package:cgpa/presentation/ui/utils/app_constant.dart';
 import 'package:cgpa/presentation/ui/utils/assets_path.dart';
@@ -8,21 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
-class AllSemesterScreen extends StatefulWidget {
-  final void Function(ThemeMode) onThemeChanged;
+class AllSemesterScreen extends StatelessWidget {
+  AllSemesterScreen({super.key});
 
-  const AllSemesterScreen({super.key, required this.onThemeChanged});
-
-  @override
-  State<AllSemesterScreen> createState() => _AllSemesterScreenState();
-}
-
-class _AllSemesterScreenState extends State<AllSemesterScreen> {
-  bool isDarkMode = false;
-  final TextEditingController _idTEController=TextEditingController();
-  final GlobalKey<FormState> _formKey=GlobalKey<FormState>();
+  final TextEditingController _idTEController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final AverageCgpaController averageCgpaController = Get.find<AverageCgpaController>();
-
+  final ThemeController themeController = Get.find<ThemeController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,63 +27,61 @@ class _AllSemesterScreenState extends State<AllSemesterScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               Align(
                 alignment: Alignment.topRight,
-                child: CustomThemeSwitch(
-                  isDarkMode: isDarkMode,
+                child: Obx(() => CustomThemeSwitch(
+                  isDarkMode: themeController.themeMode.value == ThemeMode.dark,
                   onToggle: (bool value) {
-                    setState(() {
-                      isDarkMode = value;
-                    });
-                    if (isDarkMode) {
-                      widget.onThemeChanged(ThemeMode.dark);
-                    } else {
-                      widget.onThemeChanged(ThemeMode.light);
-                    }
+                    themeController.toggleTheme();
                   },
-                ),
+                )),
               ),
               SvgPicture.asset(AssetsPath.appLogo, width: 220),
               Padding(
                 padding: const EdgeInsets.only(left: 24, right: 24, bottom: 8),
                 child: Column(
                   children: [
-                    TextFormField(
+                    Obx(() => TextFormField(
                       controller: _idTEController,
-                      keyboardType:TextInputType.number,
+                      keyboardType: TextInputType.number,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
+                      style: TextStyle(
+                        color: themeController.isDarkMode.value ? Colors.white : Colors.black,
+                      ),
+                      decoration: const InputDecoration(
                         hintText: "Enter your Student Id",
-                        labelText: "Enter your Student Id"
-                      ), validator: (String? value) {
-                      if (value?.trim().isEmpty ?? true) {
-                        return 'Enter your Student Id ex:221-15-XXXX';
-                      } else if (AppConstant.idRegExp.hasMatch(value!) == false) {
-                        return 'Enter your Student Id ex:221-15-XXXX';
-                      }
-                      return null;
-                    },
-                    ),
-                    SizedBox(height: 40),
-                    GetBuilder<AverageCgpaController>(
-                        builder: (semesterResultController) {
-                          return Visibility(
-                            visible: !semesterResultController.inProgress,
-                            replacement: CenteredCircularProgressIndicator(),
-                            child: ElevatedButton(
-                              onPressed: _onTapNextButton,
-                              style: ElevatedButton.styleFrom(
-                                fixedSize: Size(150, 50),
-                              ),
-                              child: Icon(
-                                Icons.navigate_next,
-                                color: Colors.black,
-                                size: 32,
-                              ),
-                            ),
-                          );
+                        labelText: "Enter your Student Id",
+                      ),
+                      validator: (String? value) {
+                        if (value?.trim().isEmpty ?? true) {
+                          return 'Enter your Student Id ex:221-15-XXXX';
+                        } else if (!AppConstant.idRegExp.hasMatch(value!)) {
+                          return 'Enter your Student Id ex:221-15-XXXX';
                         }
+                        return null;
+                      },
+                    )),
+
+                    const SizedBox(height: 40),
+                    GetBuilder<AverageCgpaController>(
+                      builder: (controller) {
+                        return Visibility(
+                          visible: !controller.inProgress,
+                          replacement: CenteredCircularProgressIndicator(),
+                          child: ElevatedButton(
+                            onPressed: _onTapNextButton,
+                            style: ElevatedButton.styleFrom(
+                              fixedSize: const Size(150, 50),
+                            ),
+                            child: const Icon(
+                              Icons.navigate_next,
+                              color: Colors.black,
+                              size: 32,
+                            ),
+                          ),
+                        );
+                      },
                     )
                   ],
                 ),
@@ -115,16 +106,10 @@ class _AllSemesterScreenState extends State<AllSemesterScreen> {
 
     if (isSuccess) {
       Get.to(() => AllSemesterResultScreen(), arguments: {
-        'cgpaData': averageCgpaController.cgpaData,  // Pass the model here
+        'cgpaData': averageCgpaController.cgpaData,
       });
     } else {
       Get.snackbar('Error', averageCgpaController.errorMassage ?? 'Something went wrong');
     }
-  }
-
-  @override
-  void dispose() {
-    _idTEController.dispose();
-    super.dispose();
   }
 }

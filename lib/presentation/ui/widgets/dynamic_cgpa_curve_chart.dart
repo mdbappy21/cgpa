@@ -1,11 +1,13 @@
+import 'package:cgpa/presentation/state_holders/theme_controller.dart';
 import 'package:cgpa/presentation/ui/utils/app_color.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class DynamicCGPACurveChart extends StatelessWidget {
   final List<Map<String, dynamic>> semesterResults;
-
-  const DynamicCGPACurveChart({super.key, required this.semesterResults});
+  final ThemeController themeController = Get.find<ThemeController>();
+  DynamicCGPACurveChart({super.key, required this.semesterResults});
 
   @override
   Widget build(BuildContext context) {
@@ -19,19 +21,36 @@ class DynamicCGPACurveChart extends StatelessWidget {
           maxY: 4,
           titlesData: FlTitlesData(
             leftTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 40,
+                getTitlesWidget: (value, meta) {
+                  return Text(
+                    value.toStringAsFixed(1), // Y axis values (0.0, 1.0, etc.)
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: themeController.isDarkMode.value ? Colors.white : Colors.black,
+                    ),
+                  );
+                },
+              ),
             ),
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
                 interval: 1,
                 getTitlesWidget: (value, meta) {
-                  if (value.toInt() >= 0 && value.toInt() < semesterResults.length) {
+                  if (value.toInt() >= 0 &&
+                      value.toInt() < semesterResults.length) {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
-                        semesterResults[value.toInt()]["semester"].toString().replaceAll(' ', '\n'),
-                        style: const TextStyle(fontSize: 8),
+                        semesterResults[value.toInt()]["semester"]
+                            .toString()
+                            .replaceAll(' ', '\n'),
+                        style: TextStyle(fontSize: 8, color:
+                          themeController.isDarkMode.value ? Colors.white :
+                          Colors.black,),
                         textAlign: TextAlign.center,
                       ),
                     );
@@ -49,7 +68,10 @@ class DynamicCGPACurveChart extends StatelessWidget {
           borderData: FlBorderData(show: false),
           lineBarsData: [
             LineChartBarData(
-              spots: semesterResults.asMap().entries.map((entry) {
+              spots: semesterResults
+                  .asMap()
+                  .entries
+                  .map((entry) {
                 int index = entry.key;
                 double cgpa = entry.value["cgpa"];
                 return FlSpot(index.toDouble(), cgpa);

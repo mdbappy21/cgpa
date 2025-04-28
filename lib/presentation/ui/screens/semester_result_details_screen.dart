@@ -1,5 +1,6 @@
 import 'package:cgpa/data/model/course_model.dart';
 import 'package:cgpa/data/model/semester.dart';
+import 'package:cgpa/presentation/ui/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,7 +24,6 @@ class _SemesterResultDetailsScreenState extends State<SemesterResultDetailsScree
     return Scaffold(
       appBar: AppBar(
         title: Text("DIU CGPA"),
-        leading: Icon(Icons.menu),
         actions: [Icon(Icons.picture_as_pdf), SizedBox(width: 16)],
       ),
       body: SingleChildScrollView(
@@ -48,6 +48,7 @@ class _SemesterResultDetailsScreenState extends State<SemesterResultDetailsScree
           ),
         ),
       ),
+      drawer: AppDrawer(),
     );
   }
 

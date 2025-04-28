@@ -1,5 +1,6 @@
 import 'package:cgpa/data/model/cgpa_model.dart';
 import 'package:cgpa/data/model/semester.dart';
+import 'package:cgpa/presentation/state_holders/theme_controller.dart';
 import 'package:cgpa/presentation/ui/screens/semester_result_details_screen.dart';
 import 'package:cgpa/presentation/ui/widgets/app_drawer.dart';
 import 'package:cgpa/presentation/ui/widgets/cgpa_indicator.dart';
@@ -10,7 +11,6 @@ import 'package:get/get.dart';
 
 class AllSemesterResultScreen extends StatefulWidget {
   AllSemesterResultScreen({super.key});
-
   final CgpaModel cgpaData = Get.arguments['cgpaData'];
   @override
   State<AllSemesterResultScreen> createState() =>
@@ -18,6 +18,7 @@ class AllSemesterResultScreen extends StatefulWidget {
 }
 
 class _AllSemesterResultScreenState extends State<AllSemesterResultScreen> {
+  final ThemeController themeController = Get.find<ThemeController>();
   List<Map<String, dynamic>> _getSemesterResults() {
     return widget.cgpaData.semesters?.map((semester) {
       return {
@@ -42,9 +43,9 @@ class _AllSemesterResultScreenState extends State<AllSemesterResultScreen> {
               _buildPersonalInformationSection(),
               _buildSemesterInformationSection(),
               SizedBox(height: 32),
-              SizedBox(
-                height: 250,
-                width: double.infinity,
+              Container(
+                color: themeController.isDarkMode.value ? Colors.black12 : null,
+                padding: EdgeInsets.all(16),
                 child: DynamicCGPACurveChart(
                   semesterResults: _getSemesterResults(),
                 ),

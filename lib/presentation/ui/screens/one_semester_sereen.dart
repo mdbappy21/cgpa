@@ -1,5 +1,6 @@
 import 'package:cgpa/presentation/state_holders/semester_result_controller.dart';
 import 'package:cgpa/presentation/state_holders/student_details_info_controller.dart';
+import 'package:cgpa/presentation/state_holders/theme_controller.dart';
 import 'package:cgpa/presentation/ui/screens/one_semester_result_screen.dart';
 import 'package:cgpa/presentation/ui/utils/app_constant.dart';
 import 'package:cgpa/presentation/ui/utils/assets_path.dart';
@@ -10,22 +11,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
-class OneSemesterScreen extends StatefulWidget {
-  final void Function(ThemeMode) onThemeChanged;
+class OneSemesterScreen extends StatelessWidget {
+  OneSemesterScreen({super.key});
 
-  const OneSemesterScreen({super.key, required this.onThemeChanged});
-
-  @override
-  State<OneSemesterScreen> createState() => _OneSemesterScreenState();
-}
-
-class _OneSemesterScreenState extends State<OneSemesterScreen> {
-  bool isDarkMode = false;
-  String? _selectedSemester;
- final TextEditingController _idTEController=TextEditingController();
-  final GlobalKey<FormState> _formKey=GlobalKey<FormState>();
+  final ThemeController themeController = Get.find<ThemeController>(); // <-- Inject controller
+  final TextEditingController _idTEController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final SemesterResultController semesterResultController = Get.find<SemesterResultController>();
   final StudentDetailsInfoController studentDetailsInfoController = Get.find<StudentDetailsInfoController>();
+  final RxString _selectedSemester = RxString('');
+
   final Map<String, String> _semesterOptions = {
     'Spring 2025': '251',
     'Fall 2024': '243',
@@ -90,68 +85,53 @@ class _OneSemesterScreenState extends State<OneSemesterScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               Align(
                 alignment: Alignment.topRight,
-                child: CustomThemeSwitch(
-                  isDarkMode: isDarkMode,
-                  onToggle: (bool value) {
-                    setState(() {
-                      isDarkMode = value;
-                    });
-                    if (isDarkMode) {
-                      widget.onThemeChanged(ThemeMode.dark);
-                    } else {
-                      widget.onThemeChanged(ThemeMode.light);
-                    }
-                  },
-                ),
+                child: Obx(() => CustomThemeSwitch(
+                  isDarkMode: themeController.themeMode.value == ThemeMode.dark,
+                  onToggle: (_) => themeController.toggleTheme(),
+                )),
               ),
               SvgPicture.asset(AssetsPath.appLogo, width: 220),
               Padding(
                 padding: const EdgeInsets.only(left: 24, right: 24, bottom: 8),
                 child: Column(
                   children: [
-                    TextFormField(
+                    Obx(() => TextFormField(
                       controller: _idTEController,
-                      keyboardType:TextInputType.number,
+                      keyboardType: TextInputType.number,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: InputDecoration(
-                        hintText: "Enter your Student ID",
-                        labelText: "Enter your Student ID",
+                      style: TextStyle(
+                        color: themeController.isDarkMode.value ? Colors.white : Colors.black,
                       ),
-                      style: TextStyle(color: isDarkMode?Colors.white:Colors.black),
+                      decoration: const InputDecoration(
+                        hintText: "Enter your Student Id",
+                        labelText: "Enter your Student Id",
+                      ),
                       validator: (String? value) {
                         if (value?.trim().isEmpty ?? true) {
                           return 'Enter your Student Id ex:221-15-XXXX';
-                        } else if (AppConstant.idRegExp.hasMatch(value!) == false) {
+                        } else if (!AppConstant.idRegExp.hasMatch(value!)) {
                           return 'Enter your Student Id ex:221-15-XXXX';
                         }
                         return null;
                       },
-                    ),
-                    SizedBox(height: 24),
-                    _buildDropDownMenu(),
-                    SizedBox(height: 24),
-                    GetBuilder<SemesterResultController>(
-                      builder: (semesterResultController) {
-                        return Visibility(
-                          visible: !semesterResultController.inProgress,
-                          replacement: CenteredCircularProgressIndicator(),
-                          child: ElevatedButton(
-                            onPressed: _onTapNextButton,
-                            style: ElevatedButton.styleFrom(
-                              fixedSize: Size(150, 50),
-                            ),
-                            child: Icon(
-                              Icons.navigate_next,
-                              color: Colors.black,
-                              size: 32,
-                            ),
-                          ),
-                        );
-                      }
-                    )
+                    )),
+                    const SizedBox(height: 24),
+                    Obx(() => _buildDropDownMenu()),
+                    const SizedBox(height: 24),
+                    GetBuilder<SemesterResultController>(builder: (semesterResultController) {
+                      return Visibility(
+                        visible: !semesterResultController.inProgress,
+                        replacement: const CenteredCircularProgressIndicator(),
+                        child: ElevatedButton(
+                          onPressed: _onTapNextButton,
+                          style: ElevatedButton.styleFrom(fixedSize: const Size(150, 50)),
+                          child: const Icon(Icons.navigate_next, color: Colors.black, size: 32),
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -170,34 +150,31 @@ class _OneSemesterScreenState extends State<OneSemesterScreen> {
       return;
     }
     String studentId = _idTEController.text.trim();
-    String? semesterCode = _semesterOptions[_selectedSemester];
+    String? semesterCode = _semesterOptions[_selectedSemester.value];
     if (semesterCode == null) {
       Get.snackbar('Error', 'Please select a semester.');
       return;
     }
-    bool isSuccess = await semesterResultController.getSemesterResult(
-        semesterCode, studentId);
-    bool isSuccessStudentDetails = await studentDetailsInfoController
-        .getStudentInfo(studentId);
-    if (isSuccess && isSuccessStudentDetails ) {
-      Get.to(() =>
-          OneSemesterResultScreen(
-            semesterDetailsList: semesterResultController.sgpa,
-            studentInfoDetails: studentDetailsInfoController.studentInfo,));
+    bool isSuccess = await semesterResultController.getSemesterResult(semesterCode, studentId);
+    bool isSuccessStudentDetails = await studentDetailsInfoController.getStudentInfo(studentId);
+    if (isSuccess && isSuccessStudentDetails) {
+      Get.to(() => OneSemesterResultScreen(
+        semesterDetailsList: semesterResultController.sgpa,
+        studentInfoDetails: studentDetailsInfoController.studentInfo,
+      ));
     } else {
-      Get.snackbar('Error',
-          semesterResultController.errorMassage ?? 'Something went wrong');
+      Get.snackbar('Error', semesterResultController.errorMassage ?? 'Something went wrong');
     }
   }
 
   Widget _buildDropDownMenu() {
     return Container(
-      width: double.maxFinite,
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.grey.shade200,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black26,
             blurRadius: 4,
@@ -207,23 +184,22 @@ class _OneSemesterScreenState extends State<OneSemesterScreen> {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton2<String>(
-          value: _selectedSemester,
-          hint: Text(
+          value: _selectedSemester.value.isEmpty ? null : _selectedSemester.value,
+          hint: const Text(
             "Select a Semester",
             style: TextStyle(color: Colors.black54, fontSize: 16),
           ),
           onChanged: (String? newValue) {
-            setState(() {
-              _selectedSemester = newValue;
-            });
+            if (newValue != null) {
+              _selectedSemester.value = newValue;
+            }
           },
-          items:
-          _semesterOptions.keys.map((String key) {
+          items: _semesterOptions.keys.map((String key) {
             return DropdownMenuItem<String>(
               value: key,
               child: Text(
                 key,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black,
                   fontSize: 16,
                 ),
@@ -236,28 +212,23 @@ class _OneSemesterScreenState extends State<OneSemesterScreen> {
               color: Colors.grey.shade100,
               borderRadius: BorderRadius.circular(8),
             ),
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
             elevation: 4,
           ),
-          iconStyleData: IconStyleData(
+          iconStyleData: const IconStyleData(
             icon: Icon(
               Icons.arrow_drop_down,
               color: Colors.black87,
               size: 30,
             ),
           ),
-          buttonStyleData: ButtonStyleData(
+          buttonStyleData: const ButtonStyleData(
             padding: EdgeInsets.symmetric(horizontal: 8),
             height: 60,
-            width: double.maxFinite,
+            width: double.infinity,
           ),
         ),
       ),
     );
-  }
-  @override
-  void dispose() {
-    _idTEController.dispose();
-    super.dispose();
   }
 }

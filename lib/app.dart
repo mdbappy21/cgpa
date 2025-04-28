@@ -1,35 +1,25 @@
 import 'package:cgpa/controller_binder.dart';
+import 'package:cgpa/presentation/state_holders/theme_controller.dart';
 import 'package:cgpa/presentation/ui/screens/home_screen.dart';
 import 'package:cgpa/presentation/ui/utils/app_color.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class DiuCgpa extends StatefulWidget {
+class DiuCgpa extends StatelessWidget {
   const DiuCgpa({super.key});
 
   @override
-  State<DiuCgpa> createState() => _DiuCgpaState();
-}
-
-class _DiuCgpaState extends State<DiuCgpa> {
-  ThemeMode _themeMode = ThemeMode.light;
-
-  void _changeTheme(ThemeMode mode) {
-    setState(() {
-      _themeMode = mode;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    final ThemeController themeController = Get.find<ThemeController>(); // find it
+
+    return Obx(() => GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(onThemeChanged: _changeTheme),
+      home: HomeScreen(),
       initialBinding: ControllerBinder(),
       theme: _lightThemeData(),
       darkTheme: _darkThemeData(),
-      themeMode: _themeMode,
-    );
+      themeMode: themeController.themeMode.value,
+    ));
   }
 
   ThemeData _lightThemeData() => ThemeData(
@@ -50,7 +40,7 @@ class _DiuCgpaState extends State<DiuCgpa> {
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.grey.shade200,
-      elevation: 0, // Remove shadow if needed
+      elevation: 0,
       centerTitle: true,
     ),
   );
@@ -73,14 +63,12 @@ class _DiuCgpaState extends State<DiuCgpa> {
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
-
       border: _outlineInputBorder(),
       enabledBorder: _outlineInputBorder(AppColors.themeColor1),
       focusedBorder: _outlineInputBorder(Colors.grey),
       errorBorder: _outlineInputBorder(Colors.red),
       hintStyle: TextStyle(fontWeight: FontWeight.w400),
       labelStyle: TextStyle(color: Colors.white),
-
     ),
     textTheme: TextTheme(
       bodyLarge: TextStyle(color: Colors.black),
@@ -92,10 +80,9 @@ class _DiuCgpaState extends State<DiuCgpa> {
       labelMedium: TextStyle(color: Colors.black),
       labelSmall: TextStyle(color: Colors.black),
     ),
-
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.black38,
-      elevation: 0, // Remove shadow if needed
+      elevation: 0,
       centerTitle: true,
     ),
   );

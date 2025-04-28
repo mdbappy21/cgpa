@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:cgpa/presentation/state_holders/theme_controller.dart';
 import 'package:cgpa/presentation/ui/screens/all_semester_screen.dart';
 import 'package:cgpa/presentation/ui/screens/one_semester_sereen.dart';
 import 'package:cgpa/presentation/ui/utils/app_color.dart';
@@ -7,17 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
-class HomeScreen extends StatefulWidget {
-  final void Function(ThemeMode) onThemeChanged;
+class HomeScreen extends StatelessWidget {
+  HomeScreen({super.key});
 
-  const HomeScreen({super.key, required this.onThemeChanged});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  bool isDarkMode = false;
+  final ThemeController themeController = Get.find<ThemeController>(); // <-- Inject controller
 
   @override
   Widget build(BuildContext context) {
@@ -36,47 +32,40 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(8.0),
               child: Align(
                 alignment: Alignment.topRight,
-                child: CustomThemeSwitch(
-                  isDarkMode: isDarkMode,
+                child: Obx(() => CustomThemeSwitch(
+                  isDarkMode: themeController.themeMode.value == ThemeMode.dark,
                   onToggle: (bool value) {
-                    setState(() {isDarkMode = value;});
-                    if (isDarkMode) {
-                      widget.onThemeChanged(ThemeMode.dark);
-                    } else {
-                      widget.onThemeChanged(ThemeMode.light);
-                    }
+                    themeController.toggleTheme();
                   },
-                ),
+                )),
               ),
             ),
             SvgPicture.asset(AssetsPath.appLogo, width: 220),
             Padding(
-              padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 8,),
+              padding: const EdgeInsets.only(top: 24, left: 24, right: 24, bottom: 8),
               child: Column(
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      Get.to(() => OneSemesterScreen(onThemeChanged: widget.onThemeChanged));
+                      Get.to(() => OneSemesterScreen());
                     },
                     style: ElevatedButton.styleFrom(elevation: 3),
                     child: Text(
                       "Semester SGPA",
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.themeColor1
-                      ),
+                          color: AppColors.themeColor1),
                     ),
                   ),
                   SizedBox(height: 48),
                   ElevatedButton(
                     onPressed: () {
-                      Get.to(() => AllSemesterScreen(onThemeChanged: widget.onThemeChanged));
+                      Get.to(() => AllSemesterScreen());
                     },
                     style: ElevatedButton.styleFrom(elevation: 3),
                     child: Text(
                       "Average CGPA",
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.themeColor2
-                      ),
+                          color: AppColors.themeColor2),
                     ),
                   ),
                 ],
@@ -88,9 +77,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
   void exitAppPopUp() {
     Get.defaultDialog(
-      backgroundColor:AppColors.themeColor1,
+      backgroundColor: AppColors.themeColor1,
       buttonColor: AppColors.themeColor2,
       title: 'Exit App',
       middleText: 'Are you sure you want to exit the app?',
@@ -102,9 +92,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Get.back();
       },
       onConfirm: () {
-        Get.close(1);
+        exit(0);
       },
     );
   }
-
 }
