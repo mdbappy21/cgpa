@@ -2,6 +2,7 @@ import 'package:cgpa/data/model/semester_details_model.dart';
 import 'package:cgpa/data/model/student_details_info_model.dart';
 import 'package:cgpa/presentation/ui/utils/app_color.dart';
 import 'package:cgpa/presentation/ui/widgets/app_drawer.dart';
+import 'package:cgpa/presentation/ui/widgets/cgpa_indicator.dart';
 import 'package:flutter/material.dart';
 
 class OneSemesterResultScreen extends StatefulWidget {
@@ -119,7 +120,9 @@ class _OneSemesterResultScreenState extends State<OneSemesterResultScreen> {
 
   Widget _buildSemesterInformationSection() {
     SemesterDetailsModel semester = widget.semesterDetailsList[0];
-    double totalCredit = calculateTotalCredit(widget.semesterDetailsList);
+    Map<String, double> calculatedResult = calculateTotalCreditAndCGPA(widget.semesterDetailsList);
+    double totalCredit=calculatedResult['totalCredit']!;
+    double cgpa = calculatedResult['cgpa']!;
     return SizedBox(
       width: double.maxFinite,
       child: Card(
@@ -127,15 +130,22 @@ class _OneSemesterResultScreenState extends State<OneSemesterResultScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text("Semester Information", style: Theme.of(context).textTheme.titleLarge?.copyWith(color:AppColors.themeColor2),),
-              SizedBox(height: 8),
-              Text("Student Id : ${semester.studentId}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
-              Text("Credit :$totalCredit ",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
-              Text("Semester : ${semester.semesterName}-${semester.semesterYear}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
-              Text("Year : ${semester.semesterYear}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Semester Information", style: Theme.of(context).textTheme.titleLarge?.copyWith(color:AppColors.themeColor2),),
+                  SizedBox(height: 8),
+                  Text("Student Id : ${semester.studentId}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+                  Text("Credit :$totalCredit ",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+                  Text("Semester : ${semester.semesterName}-${semester.semesterYear}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+                  Text("Year : ${semester.semesterYear}",style: Theme.of(context).textTheme.titleMedium?.copyWith(color:AppColors.themeColor1)),
+                ],
+              ),
+              CgpaIndicator(
+                cgpa: cgpa,
+              ),
             ],
           ),
         ),
@@ -172,11 +182,18 @@ class _OneSemesterResultScreenState extends State<OneSemesterResultScreen> {
   }
 
 
-  double calculateTotalCredit(List<SemesterDetailsModel> semesterList) {
+  Map<String, double> calculateTotalCreditAndCGPA(List<SemesterDetailsModel> semesterList) {
     double totalCredit = 0.0;
+    double cgpa=0.0;
+    double cgpaPoints=0;
     for (var semester in semesterList) {
-      totalCredit += semester.totalCredit ?? 0.0;  // Add the credit if it's not null
+      totalCredit += semester.totalCredit ?? 0.0;
+      cgpaPoints+=(semester.pointEquivalent??0.0)*(semester.totalCredit??0.0);
     }
-    return totalCredit;
+    cgpa=cgpaPoints/totalCredit;
+    return {
+      'totalCredit': totalCredit,
+      'cgpa': cgpa,
+    };
   }
 }
