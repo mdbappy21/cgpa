@@ -54,13 +54,13 @@ class _OneSemesterResultScreenState extends State<OneSemesterResultScreen> {
 
   Widget _buildCourseResultCard(SemesterDetailsModel semester) {
     return Card(
-      color: ColorPicker(semester),
+      color: colorPicker(semester),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildCourseResultInfo(semester),
+            Expanded(child: _buildCourseResultInfo(semester)),
             _buildCreditContainer(semester),
           ],
         ),
@@ -72,36 +72,36 @@ class _OneSemesterResultScreenState extends State<OneSemesterResultScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('${semester.customCourseId}', style: Theme.of(context).textTheme.titleMedium),
-        Text('${semester.courseTitle}', style: Theme.of(context).textTheme.titleMedium,),
+        Text('${semester.courseTitle}', style: Theme.of(context).textTheme.titleMedium?.copyWith(overflow: TextOverflow.ellipsis),),
         Text('Grade Letter: ${semester.gradeLetter}', style: Theme.of(context).textTheme.titleMedium,),
         Text('Grade Point: ${semester.pointEquivalent}', style: Theme.of(context).textTheme.titleMedium,),
       ],
     );
   }
 
-  Color ColorPicker(SemesterDetailsModel semester){
+  Color colorPicker(SemesterDetailsModel semester){
     if(semester.pointEquivalent==4){
       return Colors.green;
     }else if(semester.pointEquivalent==3.75){
-      return Colors.purple;
+      return Colors.lightGreen;
     }else if(semester.pointEquivalent==3.5){
-      return Colors.amber;
+      return Colors.lime;
     }else if(semester.pointEquivalent==3.25){
-      return Colors.blue;
+      return Colors.yellow;
     }else if(semester.pointEquivalent==3){
-      return Colors.cyan;
+      return Colors.amber;
     }else if(semester.pointEquivalent==2.75){
-      return Colors.teal;
+      return Colors.orange;
     }else if(semester.pointEquivalent==2.5){
-      return Colors.brown;
+      return Colors.deepOrange.shade500;
     }else if(semester.pointEquivalent==2.25){
-      return Colors.blueGrey;
+      return Colors.deepOrange.shade700;
     }else if(semester.pointEquivalent==2){
-      return Colors.grey.shade300;
+      return Colors.red;
     }
     else{
-      // return Colors.grey.shade300;
-      return Colors.red;
+      return Colors.grey.shade300;
+      // return Colors.red;
     }
 
   }
@@ -112,7 +112,7 @@ class _OneSemesterResultScreenState extends State<OneSemesterResultScreen> {
       height: 32,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: Colors.orange,
+        color: Colors.white,
       ),
       child: Center(child: Text("${semester.totalCredit}", textAlign: TextAlign.center)),
     );
