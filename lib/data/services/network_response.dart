@@ -8,6 +8,6 @@ class NetworkResponse {
     required this.statusCode,
     required this.isSuccess,
     this.responseData,
-    this.errorMassage='Something went wrong',
+    this.errorMassage='Server error',
   });
 }
